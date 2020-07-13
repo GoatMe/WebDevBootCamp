@@ -8,3 +8,7 @@
 .card .caption{
 	padding: 9px;	
 }
+
+.deleteForm{
+	display: inline;	
+}

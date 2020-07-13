@@ -18,12 +18,20 @@
 						<h4 class="float-right font-weight-bold">$9.00</h4>
 				</div>
 						<p><em>Submitted By - <%= cg.author.username %></em></p>
+						<!-- Check if user is logged in and owns the post -->
+						<%if(currentUser && cg.author.id.equals(currentUser._id)){ %>
+							<a class="btn btn-sm btn-warning" href="/campgrounds/<%= cg._id%>/edit">Edit</a>
+							<form class="deleteForm" action="/campgrounds/<%=cg._id%>?_method=DELETE" method="POST">
+								<button class="btn btn-sm btn-danger">Delete</button>
+							</form>
+						<%}%>
 				<div class="card-text caption">
+					<hr>
 					<p><%= cg.desc%></p>
 				</div>
 				<div class="card-footer border-success align-right bg-transparent text-dark">
 					<div class="text-right">
-					<a class="btn btn-success" href="/campgrounds/<%= cg._id%>/comments/new">Comment</a>
+					<a class="btn btn-sm btn-outline-info" href="/campgrounds/<%= cg._id%>/comments/new">Comment</a>
 					</div>
 					<hr>
 					<% cg.comments.forEach(function(comment){%>
@@ -32,6 +40,13 @@
 								<strong><%= comment.author.username %></strong>
 								<span class="float-right">10 days ago</span>
 								<p><%= comment.text%></p>
+								<!-- Check if user is logged in and owns the comment -->
+								<%if(currentUser && comment.author.id.equals(currentUser._id)){ %>
+									<a class="btn btn-sm btn-warning" href="/campgrounds/<%=cg._id%>/comments/<%=comment._id%>/edit">Edit</a>
+									<form class="deleteForm" action="/campgrounds/<%=cg._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">
+										<button class="btn btn-sm btn-danger">Delete</button>
+								<%}%>
+								</form>
 							</div>
 						</div>
 					<%});%>

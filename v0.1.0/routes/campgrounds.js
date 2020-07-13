@@ -1,7 +1,8 @@
 var express = require("express"),
 	router = express.Router(),
 	Campground = require("../model/campground"),
-	Comment = require("../model/comment");
+	Comment = require("../model/comment"),
+	middleware = require("../middleware");
 
 
 //INDEX ROUTE - show all campgrounds
@@ -16,7 +17,7 @@ router.get('/', function(request, response){
 });
 
 //CREATE Route - add new campground to DB
-router.post('/', isLoggedIn, function(request, response){
+router.post('/', middleware.isLoggedIn, function(request, response){
 	//Get data from form and add to campgrounds array
 	var name = request.body.name;
 	var img = request.body.img;
@@ -38,7 +39,7 @@ router.post('/', isLoggedIn, function(request, response){
 });
 
 //NEW ROUTE - show form to create new campground
-router.get('/new', isLoggedIn, function(request, response){
+router.get('/new', middleware.isLoggedIn, function(request, response){
 	response.render("campgrounds/new");
 });
 
@@ -55,12 +56,40 @@ router.get('/:id', function (request, response) {
 	});
 });
 
-//middleware to check if logged in
-function isLoggedIn(request, response, next) {
-	if (request.isAuthenticated()) {
-		return next();
-	}
-	response.redirect("/l");
-};
+//EDIT Campground ROUTE
+router.get("/:id/edit", middleware.CampgroundOwnerCheck, function(request, response){
+	Campground.findById(request.params.id, function(err, foundCamp){
+		if (err) {
+			console.log(err);
+			response.redirect("/campgrounds");
+		} else {
+				response.render("campgrounds/edit", {cg: foundCamp});
+		}
+	});
+});
+
+//UPDATE campground ROUTE
+router.put("/:id", middleware.CampgroundOwnerCheck, function(request, response){
+	//find and update the correct campground
+	Campground.findByIdAndUpdate(request.params.id, request.body.campground, function(err, UpdatedCamp){
+		if (err) {
+			console.log(err);
+		} else {
+			response.redirect("/campgrounds/" + request.params.id);
+		}
+	});
+});
+
+//DESTROY ROUTE
+router.delete("/:id", middleware.CampgroundOwnerCheck,function(request, response){
+	Campground.findByIdAndRemove(request.params.id, function(err){
+		if (err) {
+			console.logged(err);
+			response.redirect("/campgrounds");
+		} else {
+			response.redirect("/campgrounds");
+		}
+	})
+});
 
 module.exports = router;
