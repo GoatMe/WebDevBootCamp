@@ -3,20 +3,42 @@ var express = require("express"),
 	mongoose = require("mongoose"),
 	bodyParser = require("body-parser"),
 	Campground = require("./model/campground"),
+	passport = require("passport"),
+	LocalStrategy = require("passport-local"),
 	seedDB = require("./seeds"),
-	Comment = require("./model/comment");
+	Comment = require("./model/comment"),
+	User = require("./model/user");
 
 
 mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true,
    useUnifiedTopology: true });
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(express.static("public"));
+app.use(express.static(__dirname+ "/public"));
 
 app.set("view engine", "ejs");
 
-seedDB(); /*For deleting and repopulating the DB on each Server start*/
+// seedDB(); /*For deleting and repopulating the DB on each Server start*/
 
+
+//PASSPORT CONFIG
+app.use(require("express-session")({
+	secret: "Secret authentication message goes here",
+	resave: false,
+	saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+//middleware to inlcude user details to check if they are logged in
+//it will be exectured before all routes
+app.use(function(request, response, next){
+	response.locals.currentUser=  request.user;
+	next()
+});
 /*====================ROUTES===========================*/
 app.get('/', function(request, response){
 	response.render("landing");
@@ -25,12 +47,11 @@ app.get('/', function(request, response){
 
 //INDEX ROUTE - show all campgrounds
 app.get('/campgrounds', function(request, response){
-
 	Campground.find({}, function(err, allCamps){
 		if (err) {
 			console.log(err);
 		}else{
-			response.render("campgrounds/index", {cg: allCamps});
+			response.render("campgrounds/index", {cg: allCamps, currentUser: request.user});
 		}
 	});
 });
@@ -70,7 +91,7 @@ app.get('/campgrounds/:id', function (request, response) {
 	});
 });
 /*===================COMMENT_ROUTES============================*/
-app.get("/campgrounds/:id/comments/new", function(request, response){
+app.get("/campgrounds/:id/comments/new", isLoggedIn, function(request, response){
 	Campground.findById(request.params.id, function(err, campground){
 	if (err) {
 		console.log(err);
@@ -80,7 +101,7 @@ app.get("/campgrounds/:id/comments/new", function(request, response){
 	});
 });
 
-app.post("/campgrounds/:id/comments", function(request, response){
+app.post("/campgrounds/:id/comments", isLoggedIn, function(request, response){
 	//Lookup Campground using id
 	Campground.findById(request.params.id, function(err, campground){
 		if (err) {
@@ -99,6 +120,60 @@ app.post("/campgrounds/:id/comments", function(request, response){
 		}
 	});
 });
+
+/*====================AUTHENTICATION ROUTES===========================*/
+
+app.get("/r", function(req, res){
+	res.render("register");
+});
+
+//handle sign up logic
+app.post("/r", function(req, res){
+	var newUser = new User({username: req.body.username});
+	User.register(newUser, req.body.password, function(err, user){
+		if (err) {
+			console.log(err);
+			return res.render("register");
+		} 
+		passport.authenticate("local")(req, res, function(){
+			res.redirect("/campgrounds");
+		});
+	});
+});
+app.get("/", function(req, res){
+	
+});
+
+/*====================LOGIN ROUTES===========================*/
+//login form
+app.get("/l", function(req, res){
+	res.render("login");
+});
+
+//handling login logic
+app.post("/l",
+		passport.authenticate("local",
+		{
+			successRedirect: "/campgrounds",
+			failureRedirect: "/l"
+		})
+		, function(req, res){
+});
+
+//logout
+app.get("/logout", function(request, response){
+	response.logout();
+	response.redirect("/campgrounds");
+});
+
+//middleware to check if logged in
+function isLoggedIn(request, response, next) {
+	if (request.isAuthenticated()) {
+		return next();
+	}
+	response.redirect("/l");
+};
+
 /*===================CONNECTION============================*/
 app.listen(3000, function () {
 	console.log("YelpCamp Started!");
