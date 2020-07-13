@@ -2,6 +2,7 @@ var express = require("express"),
 	app = express(),
 	mongoose = require("mongoose"),
 	bodyParser = require("body-parser"),
+	flash = require("connect-flash"),
 	passport = require("passport"),
 	LocalStrategy = require("passport-local"),
 	methodOverride = require("method-override"),
@@ -19,6 +20,7 @@ var commentRoutes = require("./routes/comments"),
 mongoose.connect("mongodb://localhost:27017/yelp_camp", { useNewUrlParser: true,
    useUnifiedTopology: true });
 
+app.use(flash());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname+ "/public"));
 app.use(methodOverride("_method"));
@@ -43,7 +45,9 @@ passport.deserializeUser(User.deserializeUser());
 //it will be exectured before all routes
 app.use(function(request, response, next){
 	response.locals.currentUser=  request.user;
-	next()
+	response.locals.error = request.flash("error");
+	response.locals.success = request.flash("success");
+	next();
 });
 
 /*====================ROUTES===========================*/

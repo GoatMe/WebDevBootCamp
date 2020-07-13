@@ -61,6 +61,7 @@ router.get("/:id/edit", middleware.CampgroundOwnerCheck, function(request, respo
 	Campground.findById(request.params.id, function(err, foundCamp){
 		if (err) {
 			console.log(err);
+			request.flash("error", "ERROR: Can't Edit Campground.");
 			response.redirect("/campgrounds");
 		} else {
 				response.render("campgrounds/edit", {cg: foundCamp});
@@ -73,6 +74,7 @@ router.put("/:id", middleware.CampgroundOwnerCheck, function(request, response){
 	//find and update the correct campground
 	Campground.findByIdAndUpdate(request.params.id, request.body.campground, function(err, UpdatedCamp){
 		if (err) {
+			request.flash("error", "ERROR: Can't Update campground");
 			console.log(err);
 		} else {
 			response.redirect("/campgrounds/" + request.params.id);
@@ -85,8 +87,10 @@ router.delete("/:id", middleware.CampgroundOwnerCheck,function(request, response
 	Campground.findByIdAndRemove(request.params.id, function(err){
 		if (err) {
 			console.logged(err);
+			equest.flash("error", "ERROR: Something went wrong...");
 			response.redirect("/campgrounds");
 		} else {
+			request.flash("success", "Successfuly deleted comment");
 			response.redirect("/campgrounds");
 		}
 	})
