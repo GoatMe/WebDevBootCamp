@@ -22,6 +22,7 @@ router.post('/', middleware.isLoggedIn, function(request, response){
 	var name = request.body.name;
 	var img = request.body.img;
 	var desc = request.body.desc;
+	var price = request.body.price;
 	var author = {
 					id: request.user._id,
 					username: request.user.username
