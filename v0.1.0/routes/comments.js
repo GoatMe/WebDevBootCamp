@@ -43,7 +43,7 @@ router.post("/", middleware.isLoggedIn, function(request, response){
 });
 
 //EDIT ROUTE COMMENT
-router.get("/:comment_id/edit", middleware.CommentOwnerCheck, function(request, response){
+router.get("/:comment_id/edit",  middleware.isLoggedIn, middleware.CommentOwnerCheck, function(request, response){
 	Comment.findById(request.params.comment_id, function(err, foundComment){
 		if (err) {
 			console.log(err);

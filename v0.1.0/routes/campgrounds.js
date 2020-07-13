@@ -48,17 +48,18 @@ router.get('/new', middleware.isLoggedIn, function(request, response){
 router.get('/:id', function (request, response) {
 	//finding comments by id -> populating comments -> with .exec executing the function
 	Campground.findById(request.params.id).populate("comments").exec(function(err, findCamp){
-		if (err) {
+		if (err || !findCamp) {
 			console.log(err);
-		}else{
+			request.flash('error', 'Sorry, that campground does not exist!');
+			return response.redirect('/campgrounds');
+		}
 			response.render("campgrounds/show", {cg: findCamp});
 			// console.log(findCamp);
-		}
 	});
 });
 
 //EDIT Campground ROUTE
-router.get("/:id/edit", middleware.CampgroundOwnerCheck, function(request, response){
+router.get("/:id/edit", middleware.isLoggedIn, middleware.CampgroundOwnerCheck , function(request, response){
 	Campground.findById(request.params.id, function(err, foundCamp){
 		if (err) {
 			console.log(err);

@@ -1,10 +1,24 @@
 <%- include ("partials/header")%>
+<div class="grid">
+	<h1 class="l">LogIn</h1>
+	<div  class="f">
+		<form action="/l" method="POST">
+			<div class="form-group">
+				<label for="inputUsername">Username</label>
+			    <input type="text" id="inputUsername" class="form-control mx-sm-3"name="username">
 
-<h1>LogIn</h1>
-<form action="/l" method="POST">
-	<input type="text" name="username" placeholder="username">
-	<input type="password" name="password" placeholder="password">
-	<input type="submit" value="Login!">
-</form>
-
+			</div>
+			<div class="form-group">
+				<label for="inputPassword">Password</label>
+			    <input type="password" id="inputPassword" class="form-control mx-sm-3" aria-describedby="passwordHelpInline" name="password">
+			    <small id="passwordHelpInline" class="text-muted">
+			      Must be 8-20 characters long.
+			    </small>
+			</div>
+			<div class="form-group">
+				<button class="btn tbn-lg btn-primary btn-block">Login</button>
+		</form>
+	</div>
+	<a href="/campgrounds">Go Back</a>
+</div>
 <%- include ("partials/footer")%>
