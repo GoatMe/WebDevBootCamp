@@ -1,0 +1,16 @@
+<%- include ("../partials/header")%>
+
+<p><h1><%= cg.name%></h1></p>
+<p><img src="<%= cg.img%>"></p>
+<p><%= cg.desc%></p>
+<a class="btn btn-success" href="/campgrounds/<%= cg._id%>/comments/new">Comment</a>
+<% cg.comments.forEach(function(comment){%>
+	<p>
+	<strong><%= comment. author %></strong>
+	 - <%= comment.text%>
+	</p>
+<%});%>
+
+<a href="/campgrounds">Go Back</a>
+
+<%- include ("../partials/footer")%>
