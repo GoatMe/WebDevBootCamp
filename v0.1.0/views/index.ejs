@@ -24,7 +24,7 @@
 						<h5><%= CG.name%></h5>
 					</div>
 					<div class="card-text">
-						<%= CG.desc%>
+						<%= CG.desc.substring(0, 50)%>
 					</div>
 					<p>
 						<a class="btn btn-primary" href="/campgrounds/<%= CG._id%>">More Info</a>
